@@ -53,6 +53,7 @@ public class ServiceManageController {
 
     @Autowired
     private RegistryDataCache registryDataCache;
+    public String dataId;
 
     @GetMapping("/all-service")
     public List<ServiceModel> queryServiceListByService(@RequestParam("query") String query) {
@@ -163,7 +164,7 @@ public class ServiceManageController {
      */
     @GetMapping("query/providers")
     public List<RpcProvider> queryServiceProviders(@RequestParam("dataid") String serviceName) {
-        String dataId = URLDecoder.decode(serviceName);
+        dataId = URLDecoder.decode(serviceName);
         return fetchProviderData(dataId);
     }
 
@@ -174,7 +175,7 @@ public class ServiceManageController {
      */
     @GetMapping("query/consumers")
     public List<RpcConsumer> queryServiceConsumers(@RequestParam("dataid") String serviceName) {
-        String dataId = URLDecoder.decode(serviceName);
+        dataId = URLDecoder.decode(serviceName);
         return fetchConsumerData(dataId);
     }
 
@@ -208,19 +209,18 @@ public class ServiceManageController {
      */
     @GetMapping("query/config")
     public ServiceConfigModel queryConfig(@RequestParam("address") String address) throws UnsupportedEncodingException {
-        System.out.println("test");
         String EMPTY_BUFFER = new String(new byte[0], 0, 0);
         ServiceConfigModel result = new ServiceConfigModel();
         List<String> providerConfig = new ArrayList<>();
         List<String> consumerConfig = new ArrayList<>();
         TelnetClient ws = new TelnetClient(address, 1234);
-        String str1 = ws.sendCommand("service com.alipay.sofa.rpc.protocol.EchoService");
+        String str1 = ws.sendCommand("service "+dataId);
         str1 = new String(str1.getBytes("ISO-8859-1"), "GBK");
         String str2 = ws.sendCommand("list");
         str2 = new String(str2.getBytes("ISO-8859-1"), "GBK");
         providerConfig.add(str2);
 
-        String str3 = ws.sendCommand("reference com.alipay.sofa.rpc.registry.zk.HelloService");
+        String str3 = ws.sendCommand("reference "+dataId);
         str3 = new String(str3.getBytes("ISO-8859-1"), "GBK");
         String str4 = ws.sendCommand("list");
         str4 = new String(str4.getBytes("ISO-8859-1"), "GBK");
